@@ -42,6 +42,8 @@ static constexpr float Pan = 0.0002f;
 static constexpr float Fov = glm::radians(60.0f);
 static constexpr float Near = 0.1f;
 static constexpr float Far = 1000.0f;
+static constexpr float Velocity = 0.0001f;
+static constexpr float Density = 100.0f;
 
 static SDL_Window* window;
 static SDL_GPUDevice* device;
@@ -51,7 +53,7 @@ static ReadWriteTexture textures[TextureCount];
 static int size = 128;
 static int iterations = 5;
 static float dt;
-static int delay = 500;
+static int delay = 16;
 static int cooldown;
 static uint64_t time1;
 static uint64_t time2;
@@ -64,7 +66,7 @@ static float pitch;
 static float yaw;
 static float distance = std::hypotf(size, size);
 static glm::mat4 viewProj;
-static int texture = TextureDensity;
+static int texture = TextureVelocityX;
 static bool focused;
 
 static bool Init()
@@ -251,23 +253,40 @@ static void UpdateImGui(SDL_GPUCommandBuffer* commandBuffer)
     ImGui::RadioButton("Divergence Texture", &texture, TextureDivergence);
     ImGui::RadioButton("Density Texture", &texture, TextureDensity);
     ImGui::Separator();
-    static float density;
-    static float velocity[3];
-    static int position[3];
-    if (ImGui::Button("Add Velocity"))
+    auto add1 = [commandBuffer](Texture texture, const int position[3], float value)
     {
-        Add2(commandBuffer, TextureVelocityX, velocity[0]);
-        Add2(commandBuffer, TextureVelocityY, velocity[1]);
-        Add2(commandBuffer, TextureVelocityZ, velocity[2]);
+        Add1(commandBuffer, texture, {position[0], position[1], position[2]}, value);
+    };
+    static int center = size / 2 - 1;
+    static float allVelocity[3];
+    if (ImGui::Button("Add Velocity (All)"))
+    {
+        Add2(commandBuffer, TextureVelocityX, allVelocity[0]);
+        Add2(commandBuffer, TextureVelocityY, allVelocity[1]);
+        Add2(commandBuffer, TextureVelocityZ, allVelocity[2]);
     }
-    ImGui::SliderFloat3("Velocity", velocity, -1.0f, 1.0f);
+    /* TODO: needing 8 decimals of precision seems... broken as shit */
+    ImGui::SliderFloat3("Velocity##All", allVelocity, -Velocity, Velocity, "%.8f");
     ImGui::Separator();
+    static float singleVelocity[3];
+    static int singleVelocityPosition[3] = {center, center, center};
+    if (ImGui::Button("Add Velocity (Single)"))
+    {
+        add1(TextureVelocityX, singleVelocityPosition, singleVelocity[0]);
+        add1(TextureVelocityY, singleVelocityPosition, singleVelocity[1]);
+        add1(TextureVelocityZ, singleVelocityPosition, singleVelocity[2]);
+    }
+    ImGui::SliderInt3("Position##Single", singleVelocityPosition, 1, size - 2);
+    ImGui::SliderFloat3("Velocity##Single", singleVelocity, -Velocity, Velocity, "%.8f");
+    ImGui::Separator();
+    static float density;
+    static int densityPosition[3] = {center, center, center};
     if (ImGui::Button("Add Density"))
     {
-        Add1(commandBuffer, TextureDensity, {position[0], position[1], position[2]}, density);
+        add1(TextureDensity, densityPosition, density);
     }
-    ImGui::SliderFloat("Density", &density, 0.0f, 1.0f);
-    ImGui::SliderInt3("Position", position, 0, size - 1);
+    ImGui::SliderInt3("Position", densityPosition, 1, size - 2);
+    ImGui::SliderFloat("Density", &density, 0.0f, Density);
     ImGui::Separator();
     if (ImGui::Button("Reset"))
     {
@@ -373,6 +392,7 @@ static void Project3(SDL_GPUCommandBuffer* commandBuffer)
 static void Advect1(SDL_GPUCommandBuffer* commandBuffer, Texture texture)
 {
     DEBUG_GROUP(device, commandBuffer);
+    assert(texture == 0 || texture == 1 || texture == 2);
     SDL_GPUComputePass* computePass = textures[texture].BeginWritePass(commandBuffer);
     if (!computePass)
     {
@@ -546,13 +566,6 @@ static void Update()
     UpdateViewProj();
     if (cooldown <= 0)
     {
-        /* TODO: remove */
-        static int count = 0;
-        if (count++ < 2)
-        {
-            Add1(commandBuffer, TextureVelocityX, glm::ivec3(size / 2), 1.0f);
-        }
-        /* ENDTODO: */
         Diffuse(commandBuffer, textures[TextureVelocityX], viscosity);
         Diffuse(commandBuffer, textures[TextureVelocityY], viscosity);
         Diffuse(commandBuffer, textures[TextureVelocityZ], viscosity);
@@ -577,6 +590,7 @@ static void Update()
     Letterbox(commandBuffer, swapchainTexture);
     RenderImGui(commandBuffer, swapchainTexture);
     SDL_SubmitGPUCommandBuffer(commandBuffer);
+    SDL_WaitForGPUIdle(device);
 }
 
 int main(int argc, char** argv)
@@ -629,6 +643,12 @@ int main(int argc, char** argv)
                     yaw += event.motion.xrel * Pan * dt;
                     pitch -= event.motion.yrel * Pan * dt;
                     pitch = std::clamp(pitch, -limit, limit);
+                }
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                if (event.key.scancode == SDL_SCANCODE_R)
+                {
+                    CreateCells();
                 }
                 break;
             case SDL_EVENT_QUIT:

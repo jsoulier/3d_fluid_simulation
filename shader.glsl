@@ -1,30 +1,17 @@
 #ifndef SHADER_GLSL
 #define SHADER_GLSL
 
-const ivec3 VonNeumann[6] = ivec3[]
-(
-    ivec3( 1, 0, 0 ),
-    ivec3(-1, 0, 0 ),
-    ivec3( 0, 1, 0 ),
-    ivec3( 0,-1, 0 ),
-    ivec3( 0, 0, 1 ),
-    ivec3( 0, 0,-1 )
-);
-
-/* Modified to use a Jacobi iteration to avoid writing to the read texture */
 #define LIN_SOLVE(id, inImage, outImage, a, c) \
     do \
     { \
-        float value = 0.0f; \
-        for (int i = 0; i < 6; i++) \
-        { \
-            ivec3 neighbor = id + VonNeumann[i]; \
-            value += imageLoad(inImage, neighbor).x; \
-        } \
-        value *= a; \
-        value += imageLoad(inImage, id).x; \
-        value /= c; \
-        imageStore(outImage, id, vec4(value)); \
+        imageStore(outImage, id, vec4( \
+            (imageLoad(inImage, id).x + \
+                a * (imageLoad(inImage, id + ivec3( 1, 0, 0 )).x + \
+                     imageLoad(inImage, id + ivec3(-1, 0, 0 )).x + \
+                     imageLoad(inImage, id + ivec3( 0, 1, 0 )).x + \
+                     imageLoad(inImage, id + ivec3( 0,-1, 0 )).x + \
+                     imageLoad(inImage, id + ivec3( 0, 0, 1 )).x + \
+                     imageLoad(inImage, id + ivec3( 0, 0,-1 )).x)) / c)); \
     } \
     while (false) \
 
@@ -33,13 +20,21 @@ const ivec3 VonNeumann[6] = ivec3[]
     do \
     { \
         float N = size.x; \
-        vec3 dt = deltaTime * (size - 2); \
-        float tmp1 = dt.x * imageLoad(inVelocityX, id).x; \
-        float tmp2 = dt.y * imageLoad(inVelocityY, id).x; \
-        float tmp3 = dt.z * imageLoad(inVelocityZ, id).x; \
+        /* Jaan: scale for the velocity */ \
+        float dtx = deltaTime * (N - 2); \
+        float dty = deltaTime * (N - 2); \
+        float dtz = deltaTime * (N - 2); \
+        /* Jaan: position delta for the current velocity */ \
+        float tmp1 = dtx * imageLoad(inVelocityX, id).x; \
+        float tmp2 = dty * imageLoad(inVelocityY, id).x; \
+        float tmp3 = dtz * imageLoad(inVelocityZ, id).x; \
+        /* Jaan: previous position according to current position and velocity */ \
         float x = id.x - tmp1; \
         float y = id.y - tmp2; \
         float z = id.z - tmp3; \
+        /* TODO: what the fuck? without N -= 2, a bunch of shit breaks */ \
+        N -= 2; \
+        /* TODO: shouldn't it be (N - 1) instead? is that why the previous thing is required? */ \
         if (x < 0.5f) \
         { \
             x = 0.5f; \
@@ -68,6 +63,7 @@ const ivec3 VonNeumann[6] = ivec3[]
         { \
             z = N + 0.5f; \
         } \
+        /* Jaan: just a simple weighted average (i think) */ \
         float k0 = floor(z); \
         float k1 = k0 + 1.0f; \
         float s1 = x - i0; \
@@ -82,7 +78,7 @@ const ivec3 VonNeumann[6] = ivec3[]
         int j1i = int(j1); \
         int k0i = int(k0); \
         int k1i = int(k1); \
-        float value = \
+        imageStore(outImage, id, vec4( \
             s0 * (t0 * (u0 * imageLoad(inImage, ivec3(i0i, j0i, k0i)).x + \
                         u1 * imageLoad(inImage, ivec3(i0i, j0i, k1i)).x) + \
                  (t1 * (u0 * imageLoad(inImage, ivec3(i0i, j1i, k0i)).x + \
@@ -90,8 +86,7 @@ const ivec3 VonNeumann[6] = ivec3[]
             s1 * (t0 * (u0 * imageLoad(inImage, ivec3(i1i, j0i, k0i)).x + \
                         u1 * imageLoad(inImage, ivec3(i1i, j0i, k1i)).x) + \
                  (t1 * (u0 * imageLoad(inImage, ivec3(i1i, j1i, k0i)).x + \
-                        u1 * imageLoad(inImage, ivec3(i1i, j1i, k1i)).x))); \
-        imageStore(outImage, id, vec4(value)); \
+                        u1 * imageLoad(inImage, ivec3(i1i, j1i, k1i)).x))))); \
     } \
     while (false) \
 
