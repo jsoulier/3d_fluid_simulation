@@ -1,6 +1,6 @@
 # Fluid Simulation
 
-![](doc/video.mp4)
+https://github.com/user-attachments/assets/1ad166a8-c712-4bff-95cf-cbb520181d00
 
 3D Fluid Simulation using SDL3 GPU with compute shaders
 
