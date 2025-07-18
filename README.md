@@ -34,22 +34,47 @@ cd bin
 ./fluid_simulation
 ```
 
-### Images
+### Gallery
 
-![](doc/velocity_x.png)
+#### Images From Video
+
+![](doc/image1.png)
 *Velocity (X)*
-
-![](doc/velocity_y.png)
+![](doc/image2.png)
 *Velocity (Y)*
-
-![](doc/velocity_z.png)
+![](doc/image3.png)
 *Velocity (Z)*
-
-![](doc/density.png)
+![](doc/image4.png)
 *Density*
-
-![](doc/combined.png)
+![](doc/image5.png)
 *Combined*
+
+#### Offset Opposing
+
+![](doc/image6.png)
+*Velocity (Y)*
+![](doc/image7.png)
+*Combined*
+
+#### Unbalanced Opposing
+
+![](doc/image8.png)
+*Velocity (Y)*
+![](doc/image9.png)
+*Combined*
+
+#### Intersecting
+
+![](doc/image10.png)
+*Velocity (X)*
+![](doc/image11.png)
+*Velocity (Y)*
+![](doc/image12.png)
+*Velocity (Z)*
+![](doc/image13.png)
+*Combined*
+
+#### Other
 
 ### References
 
