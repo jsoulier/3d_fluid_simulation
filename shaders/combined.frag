@@ -33,10 +33,12 @@ void main()
         {
             continue;
         }
-        outColor.r += abs(texelFetch(inVelocityX, id, 0).x);
-        outColor.g += abs(texelFetch(inVelocityY, id, 0).x);
-        outColor.b += abs(texelFetch(inVelocityZ, id, 0).x);
-        outColor.a += texelFetch(inDensity, id, 0).x;
+        float density = texelFetch(inDensity, id, 0).x;
+        outColor.r += abs(texelFetch(inVelocityX, id, 0).x) * density;
+        outColor.g += abs(texelFetch(inVelocityY, id, 0).x) * density;
+        outColor.b += abs(texelFetch(inVelocityZ, id, 0).x) * density;
+        outColor.a += density;
     }
-    outColor *= ColorScale;
+    outColor.rgb *= VelocityScale;
+    outColor.a *= DensityScale;
 }

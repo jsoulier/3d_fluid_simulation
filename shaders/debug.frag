@@ -32,5 +32,5 @@ void main()
         }
         outColor += abs(texelFetch(inImage, id, 0).x);
     }
-    outColor *= ColorScale;
+    outColor *= DensityScale;
 }

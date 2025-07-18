@@ -3,7 +3,8 @@
 
 const float StepSize = 1;
 const int MaxSteps = 512;
-const float ColorScale = 20.0f;
+const float VelocityScale = 200.0f;
+const float DensityScale = 20.0f;
 
 vec3 GetRayDirection(mat4 inverseView, mat4 inverseProj, vec2 texcoord)
 {
