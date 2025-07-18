@@ -448,8 +448,8 @@ static void UpdateImGui(SDL_GPUCommandBuffer* commandBuffer)
     ImGui::SeparatorText("Settings");
     ImGui::SliderInt("Delay", &delay, 0, 1000);
     ImGui::SliderInt("Iterations", &state.iterations, 1, 50);
-    ImGui::SliderFloat("Diffusion", &state.diffusion, 0.0f, 2.0f);
-    ImGui::SliderFloat("Viscosity", &state.viscosity, 0.0f, 2.0f);
+    ImGui::SliderFloat("Diffusion", &state.diffusion, 0.0f, 1.0f);
+    ImGui::SliderFloat("Viscosity", &state.viscosity, 0.0f, 1.0f);
     if (ImGui::SliderInt("Size", &state.size, 16, 256))
     {
         CreateCells();
@@ -986,6 +986,9 @@ int main(int argc, char** argv)
                     std::lock_guard lock(mutex);
                     CreateCells();
                 }
+                break;
+            case SDL_EVENT_DROP_FILE:
+                LoadCallback(nullptr, &event.drop.data, 0);
                 break;
             case SDL_EVENT_QUIT:
                 running = false;
