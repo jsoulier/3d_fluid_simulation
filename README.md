@@ -76,6 +76,8 @@ cd bin
 
 #### Other
 
+https://github.com/user-attachments/assets/da450974-2e93-45e5-acac-0d70a1bbebc6
+
 ### References
 
 - [Fluid Simulation for Dummies](https://mikeash.com/pyblog/fluid-simulation-for-dummies.html) by Mike Ash
