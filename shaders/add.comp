@@ -1,0 +1,35 @@
+#version 450
+
+#include "config.hpp"
+
+layout(local_size_x = THREADS) in;
+layout(set = 1, binding = 0, rgba32f) uniform image2D inOutImage;
+layout(set = 0, binding = 0) buffer readonly bufferCells
+{
+    ivec2 cells[];
+};
+layout(set = 2, binding = 0) uniform uniformNumCells
+{
+    uint numCells;
+};
+layout(set = 2, binding = 1) uniform uniformValue
+{
+    float value;
+};
+
+void main()
+{
+    uint id = gl_GlobalInvocationID.x;
+    if (id >= numCells)
+    {
+        return;
+    }
+    ivec2 cell = cells[id];
+    ivec2 size = imageSize(inOutImage);
+    if (any(greaterThanEqual(cell, size)) || any(lessThan(cell, ivec2(0))))
+    {
+        return;
+    }
+    float oldValue = imageLoad(inOutImage, cell).x;
+    imageStore(inOutImage, cell, vec4(oldValue + value));
+}

@@ -8,12 +8,12 @@ struct uniformType
     uint type;
 };
 
-constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(1u, 8u, 8u);
+constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(1u, 8u, 1u);
 
-kernel void main0(constant uniformType& _87 [[buffer(0)]], texture3d<float> inImage [[texture(0)]], texture3d<float, access::write> outImage [[texture(1)]], sampler inImageSmplr [[sampler(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
+kernel void main0(constant uniformType& _85 [[buffer(0)]], texture2d<float> inImage [[texture(0)]], texture2d<float, access::write> outImage [[texture(1)]], sampler inImageSmplr [[sampler(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
 {
-    int3 size = int3(inImage.get_width(), inImage.get_height(), inImage.get_depth());
-    int3 id = int3(gl_GlobalInvocationID);
+    int2 size = int2(inImage.get_width(), inImage.get_height());
+    int2 id = int2(gl_GlobalInvocationID.xy);
     if (any(id >= size))
     {
         return;
@@ -23,22 +23,22 @@ kernel void main0(constant uniformType& _87 [[buffer(0)]], texture3d<float> inIm
     if (id.x == 1)
     {
         id.x = int(N - 1u);
-        value = inImage.read(uint3(int3(int(N - 2u), id.y, id.z)), 0).x;
+        value = inImage.read(uint2(int2(int(N - 2u), id.y)), 0).x;
     }
     else
     {
         id.x = 0;
-        value = inImage.read(uint3(int3(1, id.y, id.z)), 0).x;
+        value = inImage.read(uint2(int2(1, id.y)), 0).x;
     }
-    float _92;
-    if (_87.type == 1u)
+    float _90;
+    if (_85.type == 1u)
     {
-        _92 = -value;
+        _90 = -value;
     }
     else
     {
-        _92 = value;
+        _90 = value;
     }
-    outImage.write(float4(_92), uint3(id));
+    outImage.write(float4(_90), uint2(id));
 }
 

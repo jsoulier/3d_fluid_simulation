@@ -2,28 +2,25 @@
 
 #include "config.hpp"
 
-layout(local_size_x = THREADS, local_size_y = THREADS, local_size_z = THREADS) in;
-layout(set = 0, binding = 0) uniform sampler3D inVelocityX;
-layout(set = 0, binding = 1) uniform sampler3D inVelocityY;
-layout(set = 0, binding = 2) uniform sampler3D inVelocityZ;
+layout(local_size_x = THREADS, local_size_y = THREADS) in;
+layout(set = 0, binding = 0) uniform sampler2D inVelocityX;
+layout(set = 0, binding = 1) uniform sampler2D inVelocityY;
 layout(set = 1, binding = 0, rgba32f) uniform writeonly image3D outPressure;
 layout(set = 1, binding = 1, rgba32f) uniform writeonly image3D outDivergence;
 
 void main()
 {
-    ivec3 size = textureSize(inVelocityX, 0);
-    ivec3 id = ivec3(gl_GlobalInvocationID);
-    if (any(greaterThanEqual(id, size - 1)) || any(lessThanEqual(id, ivec3(0))))
+    ivec2 size = textureSize(inVelocityX, 0);
+    ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+    if (any(greaterThanEqual(id, size - 1)) || any(lessThanEqual(id, ivec2(0))))
     {
         return;
     }
     uint N = size.x;
     imageStore(outDivergence, id, vec4(
-        -0.5f * (texelFetch(inVelocityX, id + ivec3( 1, 0, 0 ), 0).x -
-                 texelFetch(inVelocityX, id + ivec3(-1, 0, 0 ), 0).x +
-                 texelFetch(inVelocityX, id + ivec3( 0, 1, 0 ), 0).x -
-                 texelFetch(inVelocityX, id + ivec3( 0,-1, 0 ), 0).x +
-                 texelFetch(inVelocityX, id + ivec3( 0, 0, 1 ), 0).x -
-                 texelFetch(inVelocityX, id + ivec3( 0, 0,-1 ), 0).x) / N));
+        -0.5f * (texelFetch(inVelocityX, id + ivec2( 1, 0 ), 0).x -
+                 texelFetch(inVelocityX, id + ivec2(-1, 0 ), 0).x +
+                 texelFetch(inVelocityX, id + ivec2( 0, 1 ), 0).x -
+                 texelFetch(inVelocityX, id + ivec2( 0,-1 ), 0).x) / N));
     imageStore(outPressure, id, vec4(0.0f));
 }

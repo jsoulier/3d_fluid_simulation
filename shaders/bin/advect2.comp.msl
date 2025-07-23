@@ -8,39 +8,35 @@ struct uniformDeltaTime
     float deltaTime;
 };
 
-constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(8u);
+constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(8u, 8u, 1u);
 
-kernel void main0(constant uniformDeltaTime& _60 [[buffer(0)]], texture3d<float> inDensity [[texture(0)]], texture3d<float> inVelocityX [[texture(1)]], texture3d<float> inVelocityY [[texture(2)]], texture3d<float> inVelocityZ [[texture(3)]], texture3d<float, access::write> outDensity [[texture(4)]], sampler inDensitySmplr [[sampler(0)]], sampler inVelocityXSmplr [[sampler(1)]], sampler inVelocityYSmplr [[sampler(2)]], sampler inVelocityZSmplr [[sampler(3)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
+kernel void main0(constant uniformDeltaTime& _64 [[buffer(0)]], texture2d<float> inDensity [[texture(0)]], texture2d<float> inVelocityX [[texture(1)]], texture2d<float> inVelocityY [[texture(2)]], texture2d<float, access::write> outDensity [[texture(3)]], sampler inDensitySmplr [[sampler(0)]], sampler inVelocityXSmplr [[sampler(1)]], sampler inVelocityYSmplr [[sampler(2)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
 {
-    int3 size = int3(inDensity.get_width(), inDensity.get_height(), inDensity.get_depth());
-    int3 id = int3(gl_GlobalInvocationID);
-    bool _34 = any(id >= (size - int3(1)));
-    bool _42;
-    if (!_34)
+    int2 size = int2(inDensity.get_width(), inDensity.get_height());
+    int2 id = int2(gl_GlobalInvocationID.xy);
+    bool _36 = any(id >= (size - int2(1)));
+    bool _44;
+    if (!_36)
     {
-        _42 = any(id <= int3(0));
+        _44 = any(id <= int2(0));
     }
     else
     {
-        _42 = _34;
+        _44 = _36;
     }
-    if (_42)
+    if (_44)
     {
         return;
     }
     do
     {
-        float N = float(size.x);
-        float dtx = _60.deltaTime * (N - 2.0);
-        float dty = _60.deltaTime * (N - 2.0);
-        float dtz = _60.deltaTime * (N - 2.0);
-        float tmp1 = dtx * inVelocityX.read(uint3(id), 0).x;
-        float tmp2 = dty * inVelocityY.read(uint3(id), 0).x;
-        float tmp3 = dtz * inVelocityZ.read(uint3(id), 0).x;
+        float N = float(size.x - 2);
+        float dtx = _64.deltaTime * N;
+        float dty = _64.deltaTime * N;
+        float tmp1 = dtx * inVelocityX.read(uint2(id), 0).x;
+        float tmp2 = dty * inVelocityY.read(uint2(id), 0).x;
         float x = float(id.x) - tmp1;
         float y = float(id.y) - tmp2;
-        float z = float(id.z) - tmp3;
-        N -= 2.0;
         if (x < 0.5)
         {
             x = 0.5;
@@ -61,30 +57,15 @@ kernel void main0(constant uniformDeltaTime& _60 [[buffer(0)]], texture3d<float>
         }
         float j0 = floor(y);
         float j1 = j0 + 1.0;
-        if (z < 0.5)
-        {
-            z = 0.5;
-        }
-        if (z > (N + 0.5))
-        {
-            z = N + 0.5;
-        }
-        float k0 = floor(z);
-        float k1 = k0 + 1.0;
         float s1 = x - i0;
         float s0 = 1.0 - s1;
         float t1 = y - j0;
         float t0 = 1.0 - t1;
-        float u1 = z - k0;
-        float u0 = 1.0 - u1;
         int i0i = int(i0);
         int i1i = int(i1);
         int j0i = int(j0);
         int j1i = int(j1);
-        int k0i = int(k0);
-        int k1i = int(k1);
-        float4 _329 = float4((s0 * ((t0 * ((u0 * inDensity.read(uint3(int3(i0i, j0i, k0i)), 0).x) + (u1 * inDensity.read(uint3(int3(i0i, j0i, k1i)), 0).x))) + (t1 * ((u0 * inDensity.read(uint3(int3(i0i, j1i, k0i)), 0).x) + (u1 * inDensity.read(uint3(int3(i0i, j1i, k1i)), 0).x))))) + (s1 * ((t0 * ((u0 * inDensity.read(uint3(int3(i1i, j0i, k0i)), 0).x) + (u1 * inDensity.read(uint3(int3(i1i, j0i, k1i)), 0).x))) + (t1 * ((u0 * inDensity.read(uint3(int3(i1i, j1i, k0i)), 0).x) + (u1 * inDensity.read(uint3(int3(i1i, j1i, k1i)), 0).x))))));
-        outDensity.write(_329, uint3(id));
+        outDensity.write(float4((s0 * ((t0 * inDensity.read(uint2(int2(i0i, j0i)), 0).x) + (t1 * inDensity.read(uint2(int2(i0i, j1i)), 0).x))) + (s1 * ((t0 * inDensity.read(uint2(int2(i1i, j0i)), 0).x) + (t1 * inDensity.read(uint2(int2(i1i, j1i)), 0).x)))), uint2(id));
     } while (false);
 }
 

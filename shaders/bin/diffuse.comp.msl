@@ -13,32 +13,32 @@ struct uniformDiffusion
     float diffusion;
 };
 
-constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(8u);
+constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(8u, 8u, 1u);
 
-kernel void main0(constant uniformDeltaTime& _55 [[buffer(0)]], constant uniformDiffusion& _61 [[buffer(1)]], texture3d<float> inImage [[texture(0)]], texture3d<float, access::write> outImage [[texture(1)]], sampler inImageSmplr [[sampler(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
+kernel void main0(constant uniformDeltaTime& _57 [[buffer(0)]], constant uniformDiffusion& _63 [[buffer(1)]], texture2d<float> inImage [[texture(0)]], texture2d<float, access::write> outImage [[texture(1)]], sampler inImageSmplr [[sampler(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
 {
-    int3 size = int3(inImage.get_width(), inImage.get_height(), inImage.get_depth());
-    int3 id = int3(gl_GlobalInvocationID);
-    bool _34 = any(id >= (size - int3(1)));
-    bool _42;
-    if (!_34)
+    int2 size = int2(inImage.get_width(), inImage.get_height());
+    int2 id = int2(gl_GlobalInvocationID.xy);
+    bool _36 = any(id >= (size - int2(1)));
+    bool _44;
+    if (!_36)
     {
-        _42 = any(id <= int3(0));
+        _44 = any(id <= int2(0));
     }
     else
     {
-        _42 = _34;
+        _44 = _36;
     }
-    if (_42)
+    if (_44)
     {
         return;
     }
     int N = size.x;
-    float a = ((_55.deltaTime * _61.diffusion) * float(N - 2)) * float(N - 2);
+    float a = ((_57.deltaTime * _63.diffusion) * float(N - 2)) * float(N - 2);
     float c = 1.0 + (6.0 * a);
     do
     {
-        outImage.write(float4((inImage.read(uint3(id), 0).x + (a * (((((inImage.read(uint3((id + int3(1, 0, 0))), 0).x + inImage.read(uint3((id + int3(-1, 0, 0))), 0).x) + inImage.read(uint3((id + int3(0, 1, 0))), 0).x) + inImage.read(uint3((id + int3(0, -1, 0))), 0).x) + inImage.read(uint3((id + int3(0, 0, 1))), 0).x) + inImage.read(uint3((id + int3(0, 0, -1))), 0).x))) / c), uint3(id));
+        outImage.write(float4((inImage.read(uint2(id), 0).x + (a * (((inImage.read(uint2((id + int2(1, 0))), 0).x + inImage.read(uint2((id + int2(-1, 0))), 0).x) + inImage.read(uint2((id + int2(0, 1))), 0).x) + inImage.read(uint2((id + int2(0, -1))), 0).x))) / c), uint2(id));
     } while (false);
 }
 

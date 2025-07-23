@@ -12,7 +12,7 @@ bool ReadWriteTexture::Create(SDL_GPUDevice* device, int size)
         SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_SIMULTANEOUS_READ_WRITE;
     info.width = size;
     info.height = size;
-    info.layer_count_or_depth = size;
+    info.layer_count_or_depth = 1;
     info.num_levels = 1;
     for (int i = 0; i < 2; i++)
     {

@@ -2,9 +2,9 @@
 
 #include "config.hpp"
 
-layout(local_size_x = THREADS, local_size_y = 1, local_size_z = THREADS) in;
-layout(set = 0, binding = 0) uniform sampler3D inImage;
-layout(set = 1, binding = 0, rgba32f) uniform writeonly image3D outImage;
+layout(local_size_x = THREADS, local_size_y = 1) in;
+layout(set = 0, binding = 0) uniform sampler2D inImage;
+layout(set = 1, binding = 0, rgba32f) uniform writeonly image2D outImage;
 layout(set = 2, binding = 0) uniform uniformType
 {
     uint type;
@@ -12,8 +12,8 @@ layout(set = 2, binding = 0) uniform uniformType
 
 void main()
 {
-    ivec3 size = textureSize(inImage, 0);
-    ivec3 id = ivec3(gl_GlobalInvocationID);
+    ivec2 size = textureSize(inImage, 0);
+    ivec2 id = ivec2(gl_GlobalInvocationID.xy);
     if (any(greaterThanEqual(id, size)))
     {
         return;
@@ -23,12 +23,12 @@ void main()
     if (id.y == 1)
     {
         id.y = int(N - 1);
-        value = texelFetch(inImage, ivec3(id.x, N - 2, id.z), 0).x;
+        value = texelFetch(inImage, ivec2(id.x, N - 2), 0).x;
     }
     else
     {
         id.y = 0;
-        value = texelFetch(inImage, ivec3(id.x, 1, id.z), 0).x;
+        value = texelFetch(inImage, ivec2(id.x, 1), 0).x;
     }
     imageStore(outImage, id, vec4(type == 2 ? value : value));
 }

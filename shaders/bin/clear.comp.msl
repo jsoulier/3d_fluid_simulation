@@ -8,15 +8,15 @@ struct uniformValue
     float value;
 };
 
-constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(8u);
+constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(8u, 8u, 1u);
 
-kernel void main0(constant uniformValue& _35 [[buffer(0)]], texture3d<float, access::write> writeImage [[texture(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
+kernel void main0(constant uniformValue& _37 [[buffer(0)]], texture2d<float, access::write> writeImage [[texture(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
 {
-    int3 size = int3(writeImage.get_width(), writeImage.get_height(), writeImage.get_depth());
-    int3 id = int3(gl_GlobalInvocationID);
+    int2 size = int2(writeImage.get_width(), writeImage.get_height());
+    int2 id = int2(gl_GlobalInvocationID.xy);
     if (all(id < size))
     {
-        writeImage.write(float4(_35.value), uint3(id));
+        writeImage.write(float4(_37.value), uint2(id));
     }
 }
 

@@ -2,8 +2,8 @@
 
 #include "config.hpp"
 
-layout(local_size_x = THREADS, local_size_y = THREADS, local_size_z = THREADS) in;
-layout(set = 1, binding = 0, r32f) uniform writeonly image3D writeImage;
+layout(local_size_x = THREADS, local_size_y = THREADS) in;
+layout(set = 1, binding = 0, r32f) uniform writeonly image2D writeImage;
 layout(set = 2, binding = 0) uniform uniformValue
 {
     float value;
@@ -11,8 +11,8 @@ layout(set = 2, binding = 0) uniform uniformValue
 
 void main()
 {
-    ivec3 size = imageSize(writeImage);
-    ivec3 id = ivec3(gl_GlobalInvocationID);
+    ivec2 size = imageSize(writeImage);
+    ivec2 id = ivec2(gl_GlobalInvocationID.xy);
     if (all(lessThan(id, size)))
     {
         imageStore(writeImage, id, vec4(value));

@@ -12,16 +12,8 @@ make_directory(${BINARY_DIR})
 
 set(GLM_BUILD_LIBRARY OFF)
 add_subdirectory(lib/SDL)
-add_subdirectory(lib/glm)
 add_subdirectory(lib/json)
 add_executable(fluid_simulation WIN32
-    lib/imgui/imgui.cpp
-    lib/imgui/imgui_demo.cpp
-    lib/imgui/imgui_draw.cpp
-    lib/imgui/imgui_impl_sdl3.cpp
-    lib/imgui/imgui_impl_sdlgpu3.cpp
-    lib/imgui/imgui_tables.cpp
-    lib/imgui/imgui_widgets.cpp
     src/debug_group.cpp
     src/main.cpp
     src/pipeline.cpp
@@ -29,8 +21,7 @@ add_executable(fluid_simulation WIN32
     src/shader.cpp
 )
 set_target_properties(fluid_simulation PROPERTIES CXX_STANDARD 23)
-target_include_directories(fluid_simulation PRIVATE lib/imgui)
-target_link_libraries(fluid_simulation PRIVATE SDL3::SDL3 glm nlohmann_json)
+target_link_libraries(fluid_simulation PRIVATE SDL3::SDL3 nlohmann_json)
 
 function(add_shader FILE)
     set(DEPENDS ${ARGN})
@@ -83,20 +74,16 @@ function(add_shader FILE)
     endif()
     package(${JSON})
 endfunction()
-add_shader(add1.comp)
-add_shader(add2.comp src/config.hpp)
+add_shader(add.comp src/config.hpp)
 add_shader(advect1.comp src/config.hpp shaders/shader.glsl)
 add_shader(advect2.comp src/config.hpp shaders/shader.glsl)
 add_shader(clear.comp src/config.hpp)
 add_shader(combined.frag shaders/shader.glsl)
 add_shader(combined.vert shaders/shader.glsl)
-add_shader(debug.frag shaders/shader.glsl)
-add_shader(debug.vert shaders/shader.glsl)
 add_shader(diffuse.comp src/config.hpp shaders/shader.glsl)
 add_shader(project1.comp src/config.hpp)
 add_shader(project2.comp src/config.hpp shaders/shader.glsl)
 add_shader(project3.comp src/config.hpp)
-add_shader(set_bnd1.comp src/config.hpp)
 add_shader(set_bnd2.comp src/config.hpp)
 add_shader(set_bnd3.comp src/config.hpp)
 add_shader(set_bnd4.comp src/config.hpp)

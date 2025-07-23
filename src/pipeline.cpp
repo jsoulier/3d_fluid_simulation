@@ -10,9 +10,7 @@ bool CreatePipelines(SDL_GPUDevice* device, SDL_Window* window)
 {
     SDL_GPUShader* combinedFragShader = LoadShader(device, "combined.frag");
     SDL_GPUShader* combinedVertShader = LoadShader(device, "combined.vert");
-    SDL_GPUShader* debugFragShader = LoadShader(device, "debug.frag");
-    SDL_GPUShader* debugVertShader = LoadShader(device, "debug.vert");
-    if (!combinedFragShader || !combinedVertShader || !debugFragShader || !debugVertShader)
+    if (!combinedFragShader || !combinedVertShader)
     {
         SDL_Log("Failed to create shader(s)");
         return false;
@@ -32,9 +30,6 @@ bool CreatePipelines(SDL_GPUDevice* device, SDL_Window* window)
     info.vertex_shader = combinedVertShader;
     info.fragment_shader = combinedFragShader;
     graphicsPipelines[GraphicsPipelineTypeCombined] = SDL_CreateGPUGraphicsPipeline(device, &info);
-    info.vertex_shader = debugVertShader;
-    info.fragment_shader = debugFragShader;
-    graphicsPipelines[GraphicsPipelineTypeDebug] = SDL_CreateGPUGraphicsPipeline(device, &info);
     for (int i = GraphicsPipelineTypeCount - 1; i >= 0; i--)
     {
         if (!graphicsPipelines[i])
@@ -43,8 +38,7 @@ bool CreatePipelines(SDL_GPUDevice* device, SDL_Window* window)
             return false;
         }
     }
-    computePipelines[ComputePipelineTypeAdd1] = LoadComputePipeline(device, "add1.comp");
-    computePipelines[ComputePipelineTypeAdd2] = LoadComputePipeline(device, "add2.comp");
+    computePipelines[ComputePipelineTypeAdd] = LoadComputePipeline(device, "add.comp");
     computePipelines[ComputePipelineTypeClear] = LoadComputePipeline(device, "clear.comp");
     computePipelines[ComputePipelineTypeDiffuse] = LoadComputePipeline(device, "diffuse.comp");
     computePipelines[ComputePipelineTypeProject1] = LoadComputePipeline(device, "project1.comp");
@@ -52,7 +46,6 @@ bool CreatePipelines(SDL_GPUDevice* device, SDL_Window* window)
     computePipelines[ComputePipelineTypeProject3] = LoadComputePipeline(device, "project3.comp");
     computePipelines[ComputePipelineTypeAdvect1] = LoadComputePipeline(device, "advect1.comp");
     computePipelines[ComputePipelineTypeAdvect2] = LoadComputePipeline(device, "advect2.comp");
-    computePipelines[ComputePipelineTypeSetBnd1] = LoadComputePipeline(device, "set_bnd1.comp");
     computePipelines[ComputePipelineTypeSetBnd2] = LoadComputePipeline(device, "set_bnd2.comp");
     computePipelines[ComputePipelineTypeSetBnd3] = LoadComputePipeline(device, "set_bnd3.comp");
     computePipelines[ComputePipelineTypeSetBnd4] = LoadComputePipeline(device, "set_bnd4.comp");
@@ -67,8 +60,6 @@ bool CreatePipelines(SDL_GPUDevice* device, SDL_Window* window)
     }
     SDL_ReleaseGPUShader(device, combinedFragShader);
     SDL_ReleaseGPUShader(device, combinedVertShader);
-    SDL_ReleaseGPUShader(device, debugFragShader);
-    SDL_ReleaseGPUShader(device, debugVertShader);
     return true;
 }
 
