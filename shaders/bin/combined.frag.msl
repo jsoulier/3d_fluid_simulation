@@ -13,11 +13,13 @@ struct main0_in
     float2 inTexCoord [[user(locn0)]];
 };
 
-fragment main0_out main0(main0_in in [[stage_in]], texture2d<float> inDensity [[texture(2)]], sampler inDensitySmplr [[sampler(2)]])
+fragment main0_out main0(main0_in in [[stage_in]], texture2d<float> inVelocityX [[texture(0)]], texture2d<float> inVelocityY [[texture(1)]], texture2d<float> inDensity [[texture(2)]], sampler inVelocityXSmplr [[sampler(0)]], sampler inVelocityYSmplr [[sampler(1)]], sampler inDensitySmplr [[sampler(2)]])
 {
     main0_out out = {};
+    float red = inVelocityX.sample(inVelocityXSmplr, in.inTexCoord).x;
+    float green = inVelocityY.sample(inVelocityYSmplr, in.inTexCoord).x;
     float density = inDensity.sample(inDensitySmplr, in.inTexCoord).x;
-    out.outColor = float4(density * 100.0);
+    out.outColor = float4(red, green, 1.0, density);
     return out;
 }
 

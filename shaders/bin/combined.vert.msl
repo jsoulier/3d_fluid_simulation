@@ -14,6 +14,7 @@ vertex main0_out main0(uint gl_VertexIndex [[vertex_id]])
     main0_out out = {};
     out.outTexCoord = float2(float((int(gl_VertexIndex) << 1) & 2), float(int(gl_VertexIndex) & 2));
     out.gl_Position = float4((out.outTexCoord * 2.0) - float2(1.0), 0.0, 1.0);
+    out.outTexCoord.y = 1.0 - out.outTexCoord.y;
     return out;
 }
 

@@ -10,6 +10,8 @@ layout(set = 2, binding = 2) uniform sampler2D inDensity;
 
 void main()
 {
+    float red = texture(inVelocityX, inTexCoord).x;
+    float green = texture(inVelocityY, inTexCoord).x;
     float density = texture(inDensity, inTexCoord).x;
-    outColor = vec4(density * 100.0f);
+    outColor = vec4(red, green, 1.0f, density);
 }

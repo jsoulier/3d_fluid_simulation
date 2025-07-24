@@ -5,8 +5,8 @@
 layout(local_size_x = THREADS, local_size_y = THREADS) in;
 layout(set = 0, binding = 0) uniform sampler2D inVelocityX;
 layout(set = 0, binding = 1) uniform sampler2D inVelocityY;
-layout(set = 1, binding = 0, rgba32f) uniform writeonly image3D outPressure;
-layout(set = 1, binding = 1, rgba32f) uniform writeonly image3D outDivergence;
+layout(set = 1, binding = 0, rgba32f) uniform writeonly image2D outPressure;
+layout(set = 1, binding = 1, rgba32f) uniform writeonly image2D outDivergence;
 
 void main()
 {
@@ -20,7 +20,7 @@ void main()
     imageStore(outDivergence, id, vec4(
         -0.5f * (texelFetch(inVelocityX, id + ivec2( 1, 0 ), 0).x -
                  texelFetch(inVelocityX, id + ivec2(-1, 0 ), 0).x +
-                 texelFetch(inVelocityX, id + ivec2( 0, 1 ), 0).x -
-                 texelFetch(inVelocityX, id + ivec2( 0,-1 ), 0).x) / N));
+                 texelFetch(inVelocityY, id + ivec2( 0, 1 ), 0).x -
+                 texelFetch(inVelocityY, id + ivec2( 0,-1 ), 0).x) / N));
     imageStore(outPressure, id, vec4(0.0f));
 }

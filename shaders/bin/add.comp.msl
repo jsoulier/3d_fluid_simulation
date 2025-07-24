@@ -8,14 +8,14 @@ using namespace metal;
 template <typename ImageT>
 void spvImageFence(ImageT img) { img.fence(); }
 
-struct uniformNumCells
+struct uniformCount
 {
-    uint numCells;
+    uint count;
 };
 
-struct bufferCells
+struct bufferPositions
 {
-    int2 cells[1];
+    uint positions[1];
 };
 
 struct uniformValue
@@ -25,31 +25,33 @@ struct uniformValue
 
 constant uint3 gl_WorkGroupSize [[maybe_unused]] = uint3(8u, 1u, 1u);
 
-kernel void main0(constant uniformNumCells& _19 [[buffer(0)]], constant uniformValue& _76 [[buffer(1)]], const device bufferCells& _36 [[buffer(2)]], texture2d<float, access::read_write> inOutImage [[texture(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
+kernel void main0(constant uniformCount& _19 [[buffer(0)]], constant uniformValue& _90 [[buffer(1)]], const device bufferPositions& _36 [[buffer(2)]], texture2d<float, access::read_write> inOutImage [[texture(0)]], uint3 gl_GlobalInvocationID [[thread_position_in_grid]])
 {
     uint id = gl_GlobalInvocationID.x;
-    if (id >= _19.numCells)
+    if (id >= _19.count)
     {
         return;
     }
-    int2 cell = _36.cells[id];
+    int2 position;
+    position.x = int((_36.positions[id] >> uint(0)) & 65535u);
+    position.y = int((_36.positions[id] >> uint(16)) & 65535u);
     int2 size = int2(inOutImage.get_width(), inOutImage.get_height());
-    bool _52 = any(cell >= size);
-    bool _60;
-    if (!_52)
+    bool _66 = any(position >= size);
+    bool _74;
+    if (!_66)
     {
-        _60 = any(cell < int2(0));
+        _74 = any(position < int2(0));
     }
     else
     {
-        _60 = _52;
+        _74 = _66;
     }
-    if (_60)
+    if (_74)
     {
         return;
     }
     spvImageFence(inOutImage);
-    float oldValue = inOutImage.read(uint2(cell)).x;
-    inOutImage.write(float4(oldValue + _76.value), uint2(cell));
+    float oldValue = inOutImage.read(uint2(position)).x;
+    inOutImage.write(float4(oldValue + _90.value), uint2(position));
 }
 

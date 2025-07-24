@@ -4,13 +4,13 @@
 
 layout(local_size_x = THREADS) in;
 layout(set = 1, binding = 0, rgba32f) uniform image2D inOutImage;
-layout(set = 0, binding = 0) buffer readonly bufferCells
+layout(set = 0, binding = 0) buffer readonly bufferPositions
 {
-    ivec2 cells[];
+    uint positions[];
 };
-layout(set = 2, binding = 0) uniform uniformNumCells
+layout(set = 2, binding = 0) uniform uniformCount
 {
-    uint numCells;
+    uint count;
 };
 layout(set = 2, binding = 1) uniform uniformValue
 {
@@ -20,16 +20,18 @@ layout(set = 2, binding = 1) uniform uniformValue
 void main()
 {
     uint id = gl_GlobalInvocationID.x;
-    if (id >= numCells)
+    if (id >= count)
     {
         return;
     }
-    ivec2 cell = cells[id];
+    ivec2 position;
+    position.x = int((positions[id] >> 0) & 0xFFFF);
+    position.y = int((positions[id] >> 16) & 0xFFFF);
     ivec2 size = imageSize(inOutImage);
-    if (any(greaterThanEqual(cell, size)) || any(lessThan(cell, ivec2(0))))
+    if (any(greaterThanEqual(position, size)) || any(lessThan(position, ivec2(0))))
     {
         return;
     }
-    float oldValue = imageLoad(inOutImage, cell).x;
-    imageStore(inOutImage, cell, vec4(oldValue + value));
+    float oldValue = imageLoad(inOutImage, position).x;
+    imageStore(inOutImage, position, vec4(oldValue + value));
 }

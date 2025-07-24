@@ -6,4 +6,5 @@ void main()
 {
     outTexCoord = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
     gl_Position = vec4(outTexCoord * 2.0f - 1.0f, 0.0f, 1.0f);
+    outTexCoord.y = 1.0f - outTexCoord.y;
 }
