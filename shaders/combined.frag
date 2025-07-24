@@ -8,13 +8,14 @@ layout(set = 2, binding = 0) uniform sampler2D inVelocityX;
 layout(set = 2, binding = 1) uniform sampler2D inVelocityY;
 layout(set = 2, binding = 2) uniform sampler2D inDensity;
 
-const float Color = 10000.0f;
-const float Density = 10.0f;
+const float Color = 1000.0f;
+const float Density = 5.0f;
 
 void main()
 {
-    float red = abs(texture(inVelocityX, inTexCoord).x) * Color;
-    float green = abs(texture(inVelocityY, inTexCoord).x) * Color;
+    float blue = texture(inVelocityX, inTexCoord).x * Color;
+    float green = texture(inVelocityY, inTexCoord).x * Color;
+    float red = abs(min(blue, green));
     float density = texture(inDensity, inTexCoord).x * Density;
-    outColor = vec4(red, green, 0.0f, density);
+    outColor = vec4(red, green, blue, density);
 }

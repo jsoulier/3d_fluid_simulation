@@ -32,8 +32,8 @@ enum Texture
 static_assert(TextureVelocityX == 0);
 static_assert(TextureVelocityY == 1);
 
-static constexpr float Velocity = 1.0f;
-static constexpr float Density = 100.0f;
+static constexpr float Velocity = 0.5f;
+static constexpr float Density = 50.0f;
 static constexpr int Size = 300;
 static constexpr int Iterations = 5;
 static constexpr float Diffusion = 0.0f;
@@ -134,6 +134,10 @@ static bool CreateTextures()
 
 static void Add(SDL_GPUCommandBuffer* commandBuffer, Texture texture, float value)
 {
+    if (!uploadBuffer.GetBufferSize())
+    {
+        return;
+    }
     DEBUG_GROUP(device, commandBuffer);
     SDL_GPUComputePass* computePass = textures[texture].BeginReadPass(commandBuffer);
     if (!computePass)
@@ -582,7 +586,6 @@ static void Update()
     RenderCombined(commandBuffer);
     Letterbox(commandBuffer, swapchainTexture);
     SDL_SubmitGPUCommandBuffer(commandBuffer);
-    SDL_WaitForGPUIdle(device);
 }
 
 int main(int argc, char** argv)

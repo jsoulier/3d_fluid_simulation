@@ -3,11 +3,11 @@
 #include "config.hpp"
 
 layout(local_size_x = THREADS) in;
-layout(set = 1, binding = 0, rgba32f) uniform image2D inOutImage;
 layout(set = 0, binding = 0) buffer readonly bufferPositions
 {
     uint positions[];
 };
+layout(set = 1, binding = 0, rgba32f) uniform image2D inOutImage;
 layout(set = 2, binding = 0) uniform uniformCount
 {
     uint count;
