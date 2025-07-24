@@ -24,7 +24,7 @@ kernel void main0(texture2d<float> inPressure [[texture(0)]], texture2d<float> i
         return;
     }
     uint N = uint(size.x);
-    outVelocityX.write(float4(inVelocityX.read(uint2(id), 0).x) - (((inPressure.read(uint2((id + int2(1, 0))), 0) - inPressure.read(uint2((id + int2(-1, 0))), 0)) * 0.5) / float4(float(N))), uint2(id));
-    outVelocityY.write(float4(inVelocityY.read(uint2(id), 0).x) - (((inPressure.read(uint2((id + int2(0, 1))), 0) - inPressure.read(uint2((id + int2(0, -1))), 0)) * 0.5) / float4(float(N))), uint2(id));
+    outVelocityX.write(float4(inVelocityX.read(uint2(id), 0).x) - (((inPressure.read(uint2((id + int2(1, 0))), 0) - inPressure.read(uint2((id + int2(-1, 0))), 0)) * 0.5) * float(N)), uint2(id));
+    outVelocityY.write(float4(inVelocityY.read(uint2(id), 0).x) - (((inPressure.read(uint2((id + int2(0, 1))), 0) - inPressure.read(uint2((id + int2(0, -1))), 0)) * 0.5) * float(N)), uint2(id));
 }
 

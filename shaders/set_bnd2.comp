@@ -30,5 +30,5 @@ void main()
         id.y = 0;
         value = texelFetch(inImage, ivec2(id.x, 1), 0).x;
     }
-    imageStore(outImage, id, vec4(type == 2 ? value : value));
+    imageStore(outImage, id, vec4(type == 2 ? -value : value));
 }

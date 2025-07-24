@@ -35,26 +35,10 @@ kernel void main0(constant uniformDeltaTime& _64 [[buffer(0)]], texture2d<float>
         float dty = _64.deltaTime * N;
         float tmp1 = dtx * inVelocityX.read(uint2(id), 0).x;
         float tmp2 = dty * inVelocityY.read(uint2(id), 0).x;
-        float x = float(id.x) - tmp1;
-        float y = float(id.y) - tmp2;
-        if (x < 0.5)
-        {
-            x = 0.5;
-        }
-        if (x > (N + 0.5))
-        {
-            x = N + 0.5;
-        }
+        float x = fast::clamp(float(id.x) - tmp1, 0.5, N + 0.5);
+        float y = fast::clamp(float(id.y) - tmp2, 0.5, N + 0.5);
         float i0 = floor(x);
         float i1 = i0 + 1.0;
-        if (y < 0.5)
-        {
-            y = 0.5;
-        }
-        if (y > (N + 0.5))
-        {
-            y = N + 0.5;
-        }
         float j0 = floor(y);
         float j1 = j0 + 1.0;
         float s1 = x - i0;

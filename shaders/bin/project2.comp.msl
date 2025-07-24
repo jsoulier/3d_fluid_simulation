@@ -25,7 +25,7 @@ kernel void main0(texture2d<float> inDivergence [[texture(0)]], texture2d<float,
     }
     do
     {
-        outPressure.write(float4((inDivergence.read(uint2(id), 0).x + (1.0 * (((inDivergence.read(uint2((id + int2(1, 0))), 0).x + inDivergence.read(uint2((id + int2(-1, 0))), 0).x) + inDivergence.read(uint2((id + int2(0, 1))), 0).x) + inDivergence.read(uint2((id + int2(0, -1))), 0).x))) / 6.0), uint2(id));
+        outPressure.write(float4((inDivergence.read(uint2(id), 0).x + (1.0 * (((inDivergence.read(uint2((id + int2(1, 0))), 0).x + inDivergence.read(uint2((id + int2(-1, 0))), 0).x) + inDivergence.read(uint2((id + int2(0, 1))), 0).x) + inDivergence.read(uint2((id + int2(0, -1))), 0).x))) / 4.0), uint2(id));
     } while (false);
 }
 

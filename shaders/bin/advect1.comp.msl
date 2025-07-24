@@ -42,26 +42,10 @@ kernel void main0(constant uniformVelocity& _50 [[buffer(0)]], constant uniformD
             float dty = _73.deltaTime * N;
             float tmp1 = dtx * inVelocityX.read(uint2(id), 0).x;
             float tmp2 = dty * inVelocityY.read(uint2(id), 0).x;
-            float x = float(id.x) - tmp1;
-            float y = float(id.y) - tmp2;
-            if (x < 0.5)
-            {
-                x = 0.5;
-            }
-            if (x > (N + 0.5))
-            {
-                x = N + 0.5;
-            }
+            float x = fast::clamp(float(id.x) - tmp1, 0.5, N + 0.5);
+            float y = fast::clamp(float(id.y) - tmp2, 0.5, N + 0.5);
             float i0 = floor(x);
             float i1 = i0 + 1.0;
-            if (y < 0.5)
-            {
-                y = 0.5;
-            }
-            if (y > (N + 0.5))
-            {
-                y = N + 0.5;
-            }
             float j0 = floor(y);
             float j1 = j0 + 1.0;
             float s1 = x - i0;
@@ -86,26 +70,10 @@ kernel void main0(constant uniformVelocity& _50 [[buffer(0)]], constant uniformD
                 float dty_1 = _73.deltaTime * N_1;
                 float tmp1_1 = dtx_1 * inVelocityX.read(uint2(id), 0).x;
                 float tmp2_1 = dty_1 * inVelocityY.read(uint2(id), 0).x;
-                float x_1 = float(id.x) - tmp1_1;
-                float y_1 = float(id.y) - tmp2_1;
-                if (x_1 < 0.5)
-                {
-                    x_1 = 0.5;
-                }
-                if (x_1 > (N_1 + 0.5))
-                {
-                    x_1 = N_1 + 0.5;
-                }
+                float x_1 = fast::clamp(float(id.x) - tmp1_1, 0.5, N_1 + 0.5);
+                float y_1 = fast::clamp(float(id.y) - tmp2_1, 0.5, N_1 + 0.5);
                 float i0_1 = floor(x_1);
                 float i1_1 = i0_1 + 1.0;
-                if (y_1 < 0.5)
-                {
-                    y_1 = 0.5;
-                }
-                if (y_1 > (N_1 + 0.5))
-                {
-                    y_1 = N_1 + 0.5;
-                }
                 float j0_1 = floor(y_1);
                 float j1_1 = j0_1 + 1.0;
                 float s1_1 = x_1 - i0_1;

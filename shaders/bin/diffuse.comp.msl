@@ -35,7 +35,7 @@ kernel void main0(constant uniformDeltaTime& _57 [[buffer(0)]], constant uniform
     }
     int N = size.x;
     float a = ((_57.deltaTime * _63.diffusion) * float(N - 2)) * float(N - 2);
-    float c = 1.0 + (6.0 * a);
+    float c = 1.0 + (4.0 * a);
     do
     {
         outImage.write(float4((inImage.read(uint2(id), 0).x + (a * (((inImage.read(uint2((id + int2(1, 0))), 0).x + inImage.read(uint2((id + int2(-1, 0))), 0).x) + inImage.read(uint2((id + int2(0, 1))), 0).x) + inImage.read(uint2((id + int2(0, -1))), 0).x))) / c), uint2(id));

@@ -33,11 +33,11 @@ static_assert(TextureVelocityX == 0);
 static_assert(TextureVelocityY == 1);
 
 static constexpr float Velocity = 1.0f;
-static constexpr float Density = 1.0f;
+static constexpr float Density = 100.0f;
 static constexpr int Size = 300;
 static constexpr int Iterations = 5;
-static constexpr float Diffusion = 0.01f;
-static constexpr float Viscosity = 0.01f;
+static constexpr float Diffusion = 0.0f;
+static constexpr float Viscosity = 0.0000001f;
 
 static SDL_Window* window;
 static SDL_GPUDevice* device;
@@ -53,8 +53,6 @@ static SDL_GPUSampler* sampler;
 static float dt;
 static uint64_t time1;
 static uint64_t time2;
-static int delay = 16;
-static int cooldown;
 static ComputeUploadBuffer<uint32_t> uploadBuffer;
 
 static bool Init()
@@ -157,10 +155,7 @@ static void Add(SDL_GPUCommandBuffer* commandBuffer, Texture texture, float valu
 
 static void Add(float x1, float y1, float x2, float y2)
 {
-    SDL_MouseButtonFlags buttons = SDL_GetMouseState(nullptr, nullptr);
-    bool lmb = buttons & SDL_BUTTON_LMASK;
-    bool rmb = buttons & SDL_BUTTON_RMASK;
-    if (!lmb && !rmb)
+    if (!(SDL_GetMouseState(nullptr, nullptr) & (SDL_BUTTON_LMASK | SDL_BUTTON_RMASK)))
     {
         return;
     }
@@ -192,15 +187,9 @@ static void Add(float x1, float y1, float x2, float y2)
         return;
     }
     uploadBuffer.Upload(device, commandBuffer);
-    if (lmb)
-    {
-        Add(commandBuffer, TextureVelocityX, dx * Velocity);
-        Add(commandBuffer, TextureVelocityY, dy * Velocity);
-    }
-    if (rmb)
-    {
-        Add(commandBuffer, TextureDensity, Density);
-    }
+    Add(commandBuffer, TextureVelocityX, dx * Velocity);
+    Add(commandBuffer, TextureVelocityY, dy * Velocity);
+    Add(commandBuffer, TextureDensity, Density);
     SDL_SubmitGPUCommandBuffer(commandBuffer);
 }
 
@@ -468,12 +457,11 @@ static void SetBnd5(SDL_GPUCommandBuffer* commandBuffer, ReadWriteTexture& textu
 static void SetBnd(SDL_GPUCommandBuffer* commandBuffer, ReadWriteTexture& texture, int type)
 {
     /* TODO: only sides and corners are handled in the example (not edges) */
-    // SetBnd1(commandBuffer, texture, type);
-    // SetBnd2(commandBuffer, texture, type);
-    // SetBnd3(commandBuffer, texture, type);
-    // SetBnd4(commandBuffer, texture);
-    // SetBnd5(commandBuffer, texture);
-    // texture.Swap();
+    SetBnd2(commandBuffer, texture, type);
+    SetBnd3(commandBuffer, texture, type);
+    SetBnd4(commandBuffer, texture);
+    SetBnd5(commandBuffer, texture);
+    texture.Swap();
 }
 
 static void RenderCombined(SDL_GPUCommandBuffer* commandBuffer)
@@ -561,40 +549,36 @@ static void Update()
         SDL_CancelGPUCommandBuffer(commandBuffer);
         return;
     }
-    // if (cooldown <= 0)
-    // {
-    //     for (int i = 0; i < iterations; i++)
-    //     {
-    //         Diffuse(commandBuffer, textures[TextureVelocityX], viscosity);
-    //         Diffuse(commandBuffer, textures[TextureVelocityY], viscosity);
-    //         SetBnd(commandBuffer, textures[TextureVelocityX], 1);
-    //         SetBnd(commandBuffer, textures[TextureVelocityY], 2);
-    //     }
-    //     Project1(commandBuffer);
-    //     SetBnd(commandBuffer, textures[TextureDivergence], 0);
-    //     SetBnd(commandBuffer, textures[TexturePressure], 0);
-    //     for (int i = 0; i < iterations; i++)
-    //     {
-    //         Project2(commandBuffer);
-    //         SetBnd(commandBuffer, textures[TexturePressure], 0);
-    //     }
-    //     Project3(commandBuffer);
-    //     SetBnd(commandBuffer, textures[TextureVelocityX], 1);
-    //     SetBnd(commandBuffer, textures[TextureVelocityY], 2);
-    //     Advect1(commandBuffer, TextureVelocityX);
-    //     Advect1(commandBuffer, TextureVelocityY);
-    //     textures[TextureVelocityX].Swap();
-    //     textures[TextureVelocityY].Swap();
-    //     SetBnd(commandBuffer, textures[TextureVelocityX], 1);
-    //     SetBnd(commandBuffer, textures[TextureVelocityY], 2);
-    //     Project1(commandBuffer);
-    //     Project2(commandBuffer);
-    //     Project3(commandBuffer);
-    //     Diffuse(commandBuffer, textures[TextureDensity], diffusion);
-    //     Advect2(commandBuffer);
-    //     SetBnd(commandBuffer, textures[TextureDensity], 0);
-    //     cooldown = delay;
-    // }
+    for (int i = 0; i < Iterations; i++)
+    {
+        Diffuse(commandBuffer, textures[TextureVelocityX], Viscosity);
+        Diffuse(commandBuffer, textures[TextureVelocityY], Viscosity);
+        SetBnd(commandBuffer, textures[TextureVelocityX], 1);
+        SetBnd(commandBuffer, textures[TextureVelocityY], 2);
+    }
+    Project1(commandBuffer);
+    SetBnd(commandBuffer, textures[TextureDivergence], 0);
+    SetBnd(commandBuffer, textures[TexturePressure], 0);
+    for (int i = 0; i < Iterations; i++)
+    {
+        Project2(commandBuffer);
+        SetBnd(commandBuffer, textures[TexturePressure], 0);
+    }
+    Project3(commandBuffer);
+    SetBnd(commandBuffer, textures[TextureVelocityX], 1);
+    SetBnd(commandBuffer, textures[TextureVelocityY], 2);
+    Advect1(commandBuffer, TextureVelocityX);
+    Advect1(commandBuffer, TextureVelocityY);
+    textures[TextureVelocityX].Swap();
+    textures[TextureVelocityY].Swap();
+    SetBnd(commandBuffer, textures[TextureVelocityX], 1);
+    SetBnd(commandBuffer, textures[TextureVelocityY], 2);
+    Project1(commandBuffer);
+    Project2(commandBuffer);
+    Project3(commandBuffer);
+    Diffuse(commandBuffer, textures[TextureDensity], Diffusion);
+    Advect2(commandBuffer);
+    SetBnd(commandBuffer, textures[TextureDensity], 0);
     RenderCombined(commandBuffer);
     Letterbox(commandBuffer, swapchainTexture);
     SDL_SubmitGPUCommandBuffer(commandBuffer);
@@ -633,7 +617,6 @@ int main(int argc, char** argv)
     {
         time2 = SDL_GetTicks();
         dt = time2 - time1;
-        cooldown -= dt;
         time1 = time2;
         SDL_Event event;
         while (SDL_PollEvent(&event))

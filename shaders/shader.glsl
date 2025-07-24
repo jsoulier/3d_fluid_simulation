@@ -22,26 +22,10 @@
         float dty = deltaTime * N; \
         float tmp1 = dtx * texelFetch(inVelocityX, id, 0).x; \
         float tmp2 = dty * texelFetch(inVelocityY, id, 0).x; \
-        float x = id.x - tmp1; \
-        float y = id.y - tmp2; \
-        if (x < 0.5f) \
-        { \
-            x = 0.5f; \
-        } \
-        if (x > N + 0.5f) \
-        { \
-            x = N + 0.5f; \
-        } \
+        float x = clamp(id.x - tmp1, 0.5f, N + 0.5f); \
+        float y = clamp(id.y - tmp2, 0.5f, N + 0.5f); \
         float i0 = floor(x); \
         float i1 = i0 + 1.0f; \
-        if (y < 0.5f) \
-        { \
-            y = 0.5f; \
-        } \
-        if (y > N + 0.5f) \
-        { \
-            y = N + 0.5f; \
-        } \
         float j0 = floor(y); \
         float j1 = j0 + 1.0f; \
         float s1 = x - i0; \
